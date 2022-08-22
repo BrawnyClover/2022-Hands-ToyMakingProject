@@ -1,5 +1,9 @@
 #include <SoftwareSerial.h>
-SoftwareSerial BT(7, 8);
+
+
+#define BT_RXD 8
+#define BT_TXD 7
+SoftwareSerial BT(BT_RXD, BT_TXD);
 
 void forward1() {
   Serial.write("forward\n");
@@ -45,6 +49,7 @@ void setup() {
   pinMode(4, OUTPUT);
   BT.begin(9600);
   Serial.begin(9600);
+  Serial.write("setup done\n");
 }
 
 void loop() {
