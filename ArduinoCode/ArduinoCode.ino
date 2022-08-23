@@ -1,9 +1,15 @@
 #include <SoftwareSerial.h>
+#include <Servo.h>
 
-
+#define SERVO 5
 #define BT_RXD 8
 #define BT_TXD 7
+
 SoftwareSerial BT(BT_RXD, BT_TXD);
+Servo servo;
+int angle = 0;
+String buffer="";
+bool doProcess = false;
 
 void forward1() {
   Serial.write("forward\n");
@@ -47,21 +53,39 @@ void setup() {
   pinMode(9, OUTPUT);
   pinMode(11, OUTPUT);
   pinMode(4, OUTPUT);
+  servo.attach(SERVO);
   BT.begin(9600);
   Serial.begin(9600);
   Serial.write("setup done\n");
 }
 
 void loop() {
-  Serial.flush();
-  // �⑥닔瑜� �ъ슜�섏뿬 �꾩쭊,�꾩쭊,醫뚰쉶��,�고쉶��,�뺤�
+  bool orderDone = false;
   if (BT.available()) {
+    
     char c = BT.read();
-//    Serial.write("%c\n",c);
-    if (c == 'f')forward1();
-    if (c == 'b')backward1();
-    if (c == 'l')turnleft();
-    if (c == 'r')turnright();
-    if (c == 's')stopall();
+    if(c == '\n') doProcess = true;
+    else buffer += c;
+
+    if(doProcess){
+      doProcess = false;
+//      Serial.println(buffer);
+      if (buffer[0] == 'f'){forward1(); orderDone = true;    }
+      else if (buffer[0] == 'b'){backward1(); orderDone = true;}
+      else if (buffer[0] == 'l'){turnleft(); orderDone = true;}
+      else if (buffer[0] == 'r'){turnright(); orderDone = true;}
+      else if (buffer[0] == 's'){stopall(); orderDone = true;}
+      else if (buffer[0] == 'a'){
+          int angle = (buffer[1]-'0')*100 + (buffer[2]-'0')*10 + (buffer[3]-'0');
+          if(270<angle)angle = 0;
+          else if(180<angle)angle = 180;
+          angle = 180 - angle;
+          Serial.print("Servo :");
+          Serial.println(angle);
+          servo.write(angle);
+          orderDone = true;
+      }
+      buffer = "";
+    }
   }
-}
+} 
