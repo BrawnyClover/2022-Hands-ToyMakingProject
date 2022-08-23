@@ -27,6 +27,9 @@ public class MainActivity extends AppCompatActivity
     private BluetoothDevice bluetoothDevice = null;
     private BluetoothSocket bluetoothSocket = null;
     private OutputStream outputStream = null;
+    private String pairingInfoText = null;
+    private boolean isBTActivated = false;
+    private TextView pairingInfoView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -51,7 +54,7 @@ public class MainActivity extends AppCompatActivity
                 startActivityForResult(intent, REQUEST_ENABLE_BT);
             }
         }
-
+        pairingInfoView = findViewById(R.id.pairing_info);
         JoystickView joystickView = findViewById(R.id.joystick);
         TextView angleValueView = findViewById(R.id.value_angle);
         TextView strengthValueView = findViewById(R.id.value_strength);
@@ -59,13 +62,19 @@ public class MainActivity extends AppCompatActivity
         JoystickView joystickRightView = findViewById(R.id.joystick_right);
         TextView angleValueRightView = findViewById(R.id.value_angle_right);
         TextView strengthValueRightView = findViewById(R.id.value_strength_right);
-
         joystickView.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
             public void onMove(int x, int y) {
                 angleValueView.setText(String.format("angle : %d", x));
                 strengthValueView.setText(String.format("strength : %d", y));
-                sendData(String.format("L%3d%3d", x, y));
+                if(y == 0){
+                    sendData(String.valueOf('s'));
+                }
+                else {
+                    char order = calcOrder(x);
+//                sendData(String.format("L%3d%3d", x, y));
+                    sendData(String.valueOf(order));
+                }
             }
         });
         joystickRightView.setOnMoveListener(new JoystickView.OnMoveListener() {
@@ -73,9 +82,27 @@ public class MainActivity extends AppCompatActivity
             public void onMove(int x, int y) {
                 angleValueRightView.setText(String.format("angle : %d", x));
                 strengthValueRightView.setText(String.format("strength : %d", y));
-                sendData(String.format("R%3d%3d", x, y));
+                sendData(String.format("a%03d",x));
+//                sendData(String.format("R%3d%3d", x, y));
             }
         });
+
+        pairingInfoView.setText(pairingInfoText);
+    }
+
+    private char calcOrder(int x){
+        if(0<=x && x<45){
+            return 'r';
+        }
+        else if(45<=x && x<135){
+            return 'f';
+        }
+        else if(135<=x && x<225){
+            return 'l';
+        }
+        else{
+            return 'b';
+        }
     }
 
     @Override
@@ -84,9 +111,10 @@ public class MainActivity extends AppCompatActivity
         switch(requestCode) {
             case REQUEST_ENABLE_BT:
                 if (requestCode == RESULT_OK) {
+                    isBTActivated = true;
                     selectBluetoothDevice();
                 } else {
-
+                    isBTActivated = false;
                 }
                 break;
         }
@@ -103,9 +131,12 @@ public class MainActivity extends AppCompatActivity
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("Devices");
             List<String> list = new ArrayList<>();
-            for(BluetoothDevice bluetoothDevice : devices){
-                list.add(bluetoothDevice.getName());
-            }
+//            for(BluetoothDevice bluetoothDevice : devices){
+//
+//                list.add(bluetoothDevice.getName());
+//            }
+            list.add("BLITZ1");
+            list.add("BLITZ2");
             list.add("취소");
 
             final CharSequence[] charSequences = list.toArray(new CharSequence[list.size()]);
@@ -125,9 +156,16 @@ public class MainActivity extends AppCompatActivity
 
     public void connectDevice(String deviceName)
     {
+        if(deviceName.equals("취소")){
+            isBTActivated = false;
+            return;
+        }
         for(BluetoothDevice tmpDevice : devices){
             if(deviceName.equals(tmpDevice.getName())) {
                 bluetoothDevice = tmpDevice;
+                pairingInfoText = bluetoothDevice.getName();
+                pairingInfoView.setText(pairingInfoText);
+                Log.d("deviceName", pairingInfoText);
                 break;
             }
             Log.d("connect","found device");
@@ -155,6 +193,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void onArmShootBtnClick(View view) {
-        sendData("S");
+        try{
+        sendData("H");
+        }catch (Exception e){
+
+        }
+
     }
 }

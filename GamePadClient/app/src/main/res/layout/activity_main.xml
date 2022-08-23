@@ -18,6 +18,16 @@
         app:layout_constraintStart_toEndOf="@+id/joystick"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/pairing_info"
+        android:layout_width="100dp"
+        android:layout_height="30dp"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/shoot_arm_btn"
+        app:layout_constraintEnd_toStartOf="@+id/value_angle_right"
+        app:layout_constraintStart_toEndOf="@+id/value_angle"
+        app:layout_constraintTop_toTopOf="parent"></TextView>
+
     <com.monotics.view.joystick.JoystickView
         android:id="@+id/joystick"
         android:layout_width="200dp"
