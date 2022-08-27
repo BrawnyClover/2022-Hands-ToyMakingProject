@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity
             public void onMove(int x, int y) {
                 angleValueRightView.setText(String.format("angle : %d", x));
                 strengthValueRightView.setText(String.format("strength : %d", y));
-                sendData(String.format("a%03d",x));
+                sendData(String.format("a%03d%03d",x,y));
 //                sendData(String.format("R%3d%3d", x, y));
             }
         });
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private char calcOrder(int x){
-        if(0<=x && x<45){
+        if((0<=x && x<45) || (360>=x && 315<x)){
             return 'r';
         }
         else if(45<=x && x<135){
